@@ -1,7 +1,5 @@
 package com.example.btvn_android
-
 import java.util.Scanner
-
 class Student(
     var id: String,
     var fullName: String,
@@ -9,113 +7,188 @@ class Student(
     var major: String,
     var gpa: Double
 )
-
 val scanner = Scanner(System.`in`)
 
-// 5 sinh vien mau duoc tao san luon tai day
+// 5 sinh vien mau (nen doi thong tin de khong bi trung voi bai khac)
 val list = arrayListOf(
-    Student("SV01", "le Van Hai", 20, "CNTT", 8.6),
+    Student("SV01", "Le Van Hai", 20, "CNTT", 8.6),
     Student("SV02", "Tran Thi Binh", 22, "Kinh Te", 7.5),
-    Student("SV03", "Le Van Cuong", 19, "CNTT", 3.8),
+    Student("SV03", "Nguyen Van Cuong", 19, "CNTT", 4.2),
     Student("SV04", "Pham Thi Dung", 23, "Dien Tu", 8.2),
     Student("SV05", "Hoang Van Em", 21, "Kinh Te", 6.9)
 )
-
 fun inTieuDe() {
     println("------------------------------------------------------------")
     System.out.printf("%-10s %-20s %-8s %-12s %-6s\n", "ID", "Full Name", "Age", "Major", "GPA")
     println("------------------------------------------------------------")
 }
-
 fun inSinhVien(s: Student) {
     System.out.printf("%-10s %-20s %-8d %-12s %-6.2f\n", s.id, s.fullName, s.age, s.major, s.gpa)
 }
-
 // 1. Add student
 fun themSinhVien() {
     print("Nhap ID: ")
-    val id = scanner.nextLine()
+    val id = scanner.nextLine().trim()
     print("Nhap Full Name: ")
-    val name = scanner.nextLine()
-    print("Nhap Age: ")
-    val age = scanner.nextLine().toInt()
+    val name = scanner.nextLine().trim()
+
+    var age: Int? = null
+    while (age == null || age <= 0) {
+        print("Nhap Age (> 0): ")
+        age = scanner.nextLine().toIntOrNull()
+        if (age == null || age <= 0) println("Tuoi khong hop le, vui long nhap lai!")
+    }
+
     print("Nhap Major: ")
-    val major = scanner.nextLine()
-    print("Nhap GPA: ")
-    val gpa = scanner.nextLine().toDouble()
+    val major = scanner.nextLine().trim()
+
+    var gpa: Double? = null
+    while (gpa == null || gpa < 0.0 || gpa > 10.0) {
+        print("Nhap GPA (0.0 -> 10.0): ")
+        gpa = scanner.nextLine().toDoubleOrNull()
+        if (gpa == null || gpa < 0.0 || gpa > 10.0) println("GPA khong hop le, vui long nhap lai!")
+    }
 
     list.add(Student(id, name, age, major, gpa))
-    println(" Them sinh vien thanh cong!")
+    println(">> Them sinh vien thanh cong!")
 }
 
-// 2. Display all students
+// 2. Display all students (Kèm các tùy chọn sắp xếp hiển thị)
 fun hienThiTatCa() {
     if (list.isEmpty()) {
-        println("Danh sach trong!")
+        println(">> Danh sach trong!")
         return
     }
-    inTieuDe()
-    for (s in list) {
-        inSinhVien(s)
+    println("\n--- DISPLAY OPTIONS ---")
+    println("1. Danh sach mac dinh")
+    println("2. Sap xep GPA giam dan")
+    println("3. Sap xep theo tuoi tang dan")
+    println("4. Sap xep theo ten (A-Z)")
+    print("Chon cach hien thi: ")
+
+    val dsHienThi = ArrayList(list)
+    when (scanner.nextLine().toIntOrNull()) {
+        2 -> {
+            // Bubble sort GPA giam dan
+            for (i in 0 until dsHienThi.size - 1) {
+                for (j in 0 until dsHienThi.size - 1 - i) {
+                    if (dsHienThi[j].gpa < dsHienThi[j + 1].gpa) {
+                        val t = dsHienThi[j]
+                        dsHienThi[j] = dsHienThi[j + 1]
+                        dsHienThi[j + 1] = t
+                    }
+                }
+            }
+            println(">> Danh sach sap xep GPA giam dan:")
+        }
+        3 -> {
+            // Bubble sort tuoi tang dan
+            for (i in 0 until dsHienThi.size - 1) {
+                for (j in 0 until dsHienThi.size - 1 - i) {
+                    if (dsHienThi[j].age > dsHienThi[j + 1].age) {
+                        val t = dsHienThi[j]
+                        dsHienThi[j] = dsHienThi[j + 1]
+                        dsHienThi[j + 1] = t
+                    }
+                }
+            }
+            println(">> Danh sach sap xep theo tuoi:")
+        }
+        4 -> {
+            // Sap xep theo ten (lay tu cuoi cung trong Full Name)
+            for (i in 0 until dsHienThi.size - 1) {
+                for (j in 0 until dsHienThi.size - 1 - i) {
+                    val ten1 = dsHienThi[j].fullName.trim().substringAfterLast(" ")
+                    val ten2 = dsHienThi[j + 1].fullName.trim().substringAfterLast(" ")
+                    if (ten1.compareTo(ten2, ignoreCase = true) > 0) {
+                        val t = dsHienThi[j]
+                        dsHienThi[j] = dsHienThi[j + 1]
+                        dsHienThi[j + 1] = t
+                    }
+                }
+            }
+            println(">> Danh sach sap xep theo ten (A-Z):")
+        }
+        else -> println(">> Danh sach sinh vien:")
     }
+
+    inTieuDe()
+    for (s in dsHienThi) inSinhVien(s)
 }
 
 // 3. Search student
 fun timKiem() {
+    println("\n--- SEARCH MENU ---")
     println("1. Tim theo GPA tu 7.0 den 8.5")
     println("2. Tim tat ca sinh vien theo mot nganh")
     println("3. Tim sinh vien theo mot phan ten")
-    println("4. Tim kiem theo ID SINH VIEN")
+    println("4. Tim kiem theo ID sinh vien")
     print("Chon: ")
-    val c = scanner.nextLine().toInt()
+    val c = scanner.nextLine().toIntOrNull() ?: 0
 
-    if (c == 1) {
-        inTieuDe()
-        for (s in list) {
-            if (s.gpa >= 7.0 && s.gpa <= 8.5) {
-                inSinhVien(s)
+    when (c) {
+        1 -> {
+            var count = 0
+            inTieuDe()
+            for (s in list) {
+                if (s.gpa in 7.0..8.5) {
+                    inSinhVien(s)
+                    count++
+                }
             }
+            if (count == 0) println("Khong tim thay sinh vien nao co GPA tu 7.0 den 8.5")
         }
-    } else if (c == 2) {
-        print("Nhap ten nganh: ")
-        val nganh = scanner.nextLine()
-        inTieuDe()
-        for (s in list) {
-            if (s.major.equals(nganh, ignoreCase = true)) {
-                inSinhVien(s)
+        2 -> {
+            print("Nhap ten nganh can tim: ")
+            val nganh = scanner.nextLine().trim()
+            var count = 0
+            inTieuDe()
+            for (s in list) {
+                if (s.major.equals(nganh, ignoreCase = true)) {
+                    inSinhVien(s)
+                    count++
+                }
             }
+            if (count == 0) println("Khong tim thay sinh vien thuoc nganh $nganh")
         }
-    } else if (c == 3) {
-        print("Nhap mot phan ten: ")
-        val ten = scanner.nextLine()
-        inTieuDe()
-        for (s in list) {
-            if (s.fullName.lowercase().contains(ten.lowercase())) {
-                inSinhVien(s)
+        3 -> {
+            print("Nhap mot phan ten: ")
+            val ten = scanner.nextLine().trim()
+            var count = 0
+            inTieuDe()
+            for (s in list) {
+                if (s.fullName.lowercase().contains(ten.lowercase())) {
+                    inSinhVien(s)
+                    count++
+                }
             }
+            if (count == 0) println("Khong co sinh vien nao khop voi chuoi '$ten'")
         }
-    } else if (c == 4) {
-        print("Nhap ID sinh vien: ")
-        val maTim = scanner.nextLine()
-        var timThay = false
-
-        for (s in list) {
-            if (s.id.equals(maTim, ignoreCase = true)) {
-                inTieuDe()
-                inSinhVien(s)
-                timThay = true
-                break
+        4 -> {
+            print("Nhap ID sinh vien: ")
+            val maTim = scanner.nextLine().trim()
+            var timThay = false
+            for (s in list) {
+                if (s.id.equals(maTim, ignoreCase = true)) {
+                    inTieuDe()
+                    inSinhVien(s)
+                    timThay = true
+                    break
+                }
             }
+            if (!timThay) println(">> Khong tim thay sinh vien co ID: $maTim")
         }
-
-        if (!timThay) {
-            println(">> Khong tim thay sinh vien co ID: $maTim")
-        }
+        else -> println("Lua chon khong hop le!")
     }
 }
 
-// 4. Calculate average GPA & Dem GPA
+// 4. Calculate average GPA & Thong ke
 fun tinhGpaVaDem() {
+    if (list.isEmpty()) {
+        println(">> Danh sach trong!")
+        return
+    }
+
     var demGioi = 0
     var demYeu = 0
     var tongGpa = 0.0
@@ -126,12 +199,13 @@ fun tinhGpaVaDem() {
         if (s.gpa < 5.0) demYeu++
     }
 
-    println("GPA trung binh toan truong: " + (tongGpa / list.size))
+    println("\n--- THONG KE GPA ---")
+    System.out.printf("GPA trung binh toan truong: %.2f\n", (tongGpa / list.size))
     println("So sinh vien GPA >= 8.0: $demGioi")
     println("So sinh vien GPA < 5.0: $demYeu")
 
-    print("Nhap nganh can tinh GPA trung binh: ")
-    val nganh = scanner.nextLine()
+    print("\nNhap nganh can tinh GPA trung binh: ")
+    val nganh = scanner.nextLine().trim()
     var tongNganh = 0.0
     var demNganh = 0
 
@@ -143,15 +217,18 @@ fun tinhGpaVaDem() {
     }
 
     if (demNganh > 0) {
-        println("GPA trung binh nganh $nganh: " + (tongNganh / demNganh))
+        System.out.printf("GPA trung binh nganh %s: %.2f (Co %d sinh vien)\n", nganh, (tongNganh / demNganh), demNganh)
     } else {
-        println("Khong co sinh vien nao thuoc nganh $nganh")
+        println(">> Khong co sinh vien nao thuoc nganh $nganh")
     }
 }
 
-// 5. Find student with highest GPA & Oldest
+// 5. Find student with highest GPA, Oldest & Top 3
 fun timGpaCaoNhatVaLonTuoiNhat() {
-    if (list.isEmpty()) return
+    if (list.isEmpty()) {
+        println(">> Danh sach trong!")
+        return
+    }
 
     var maxGpa = list[0]
     var lonTuoi = list[0]
@@ -161,19 +238,35 @@ fun timGpaCaoNhatVaLonTuoiNhat() {
         if (s.age > lonTuoi.age) lonTuoi = s
     }
 
-    println(">> Sinh vien co GPA cao nhat:")
+    println("\n>> Sinh vien co GPA cao nhat:")
     inTieuDe()
     inSinhVien(maxGpa)
 
-    println(">> Sinh vien lon tuoi nhat:")
+    println("\n>> Sinh vien lon tuoi nhat:")
     inTieuDe()
     inSinhVien(lonTuoi)
+
+    // Hien thi 3 sinh vien GPA cao nhat
+    println("\n>> Top 3 sinh vien co GPA cao nhat:")
+    val tam = ArrayList(list)
+    for (i in 0 until tam.size - 1) {
+        for (j in 0 until tam.size - 1 - i) {
+            if (tam[j].gpa < tam[j + 1].gpa) {
+                val t = tam[j]
+                tam[j] = tam[j + 1]
+                tam[j + 1] = t
+            }
+        }
+    }
+    inTieuDe()
+    val top = if (tam.size < 3) tam.size else 3
+    for (i in 0 until top) inSinhVien(tam[i])
 }
 
 // 6. Remove student
 fun xoaSinhVien() {
     print("Nhap ID can xoa: ")
-    val id = scanner.nextLine()
+    val id = scanner.nextLine().trim()
     var viTri = -1
 
     for (i in 0 until list.size) {
@@ -185,95 +278,9 @@ fun xoaSinhVien() {
 
     if (viTri != -1) {
         list.removeAt(viTri)
-        println(">> Da xoa thanh cong!")
+        println(">> Da xoa sinh vien co ID $id thanh cong!")
     } else {
-        println(">> Khong tim thay ID nay!")
-    }
-}
-
-// 7. Sap xep & Top 3
-fun sapXepMenu() {
-    println("1. Sap xep GPA giam dan & Top 3")
-    println("2. Sap xep theo tuoi tang dan")
-    println("3. Sap xep theo First Name (A-Z)")
-    println("4. Sap xep theo ket qua (PASS truoc, ROT sau)")
-    print("Chon: ")
-    val c = scanner.nextLine().toInt()
-
-    val tam = ArrayList(list)
-
-    if (c == 1) {
-        // Bubble sort GPA giam dan
-        for (i in 0 until tam.size - 1) {
-            for (j in 0 until tam.size - 1 - i) {
-                if (tam[j].gpa < tam[j + 1].gpa) {
-                    val t = tam[j]
-                    tam[j] = tam[j + 1]
-                    tam[j + 1] = t
-                }
-            }
-        }
-        println(">> Danh sach sau sap xep GPA giam dan:")
-        inTieuDe()
-        for (s in tam) inSinhVien(s)
-
-        println(">> Top 3 sinh vien GPA cao nhat:")
-        inTieuDe()
-        val top = if (tam.size < 3) tam.size else 3
-        for (i in 0 until top) inSinhVien(tam[i])
-
-    } else if (c == 2) {
-        // Bubble sort tuoi tang dan
-        for (i in 0 until tam.size - 1) {
-            for (j in 0 until tam.size - 1 - i) {
-                if (tam[j].age > tam[j + 1].age) {
-                    val t = tam[j]
-                    tam[j] = tam[j + 1]
-                    tam[j + 1] = t
-                }
-            }
-        }
-        inTieuDe()
-        for (s in tam) inSinhVien(s)
-
-    } else if (c == 3) {
-        // Bubble sort: Lay tu cuoi cung trong Ho va Ten (First Name kieu Viet) de so sanh
-        for (i in 0 until tam.size - 1) {
-            for (j in 0 until tam.size - 1 - i) {
-                val ten1 = tam[j].fullName.trim().substringAfterLast(" ")
-                val ten2 = tam[j + 1].fullName.trim().substringAfterLast(" ")
-
-                if (ten1.compareTo(ten2, ignoreCase = true) > 0) {
-                    val t = tam[j]
-                    tam[j] = tam[j + 1]
-                    tam[j + 1] = t
-                }
-            }
-        }
-        println(">> Danh sach sau sap xep theo First Name (A-Z):")
-        inTieuDe()
-        for (s in tam) inSinhVien(s)
-
-    } else if (c == 4) {
-        // Bubble sort: PASS (gpa >= 4.0) dung truoc, ROT (gpa < 4.0) dung sau
-        for (i in 0 until tam.size - 1) {
-            for (j in 0 until tam.size - 1 - i) {
-                if (tam[j].gpa < 4.0 && tam[j + 1].gpa >= 4.0) {
-                    val t = tam[j]
-                    tam[j] = tam[j + 1]
-                    tam[j + 1] = t
-                }
-            }
-        }
-        println(">> Danh sach sau sap xep (PASS truoc, ROT sau):")
-        println("----------------------------------------------------------------------")
-        System.out.printf("%-10s %-20s %-8s %-12s %-6s %-8s\n", "ID", "Full Name", "Age", "Major", "GPA", "Status")
-        println("----------------------------------------------------------------------")
-        for (s in tam) {
-            val status = if (s.gpa >= 4.0) "PASS" else "ROT"
-            System.out.printf("%-10s %-20s %-8d %-12s %-6.2f %-8s\n", s.id, s.fullName, s.age, s.major, s.gpa, status)
-        }
-        println("----------------------------------------------------------------------")
+        println(">> Khong tim thay sinh vien co ID: $id")
     }
 }
 
@@ -287,7 +294,6 @@ fun main() {
         println("4. Calculate average GPA")
         println("5. Find student with highest GPA")
         println("6. Remove student")
-        println("7. Sap xep & Top 3")
         println("0. Exit")
         println("========================================")
         print("Choose: ")
@@ -299,12 +305,11 @@ fun main() {
             4 -> tinhGpaVaDem()
             5 -> timGpaCaoNhatVaLonTuoiNhat()
             6 -> xoaSinhVien()
-            7 -> sapXepMenu()
             0 -> {
                 println("Tam biet!")
                 chay = false
             }
-            else -> println("Lua chon khong hop le!")
+            else -> println("Lua chon khong hop le! Vui long nhap tu 0 den 6.")
         }
     }
 }
